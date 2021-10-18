@@ -11,8 +11,11 @@ public class Words {
     private static final String OUTPUT_FORMAT = "%s - %d%n";
     private static final int MIN_LENGTH = 4;
     private static final int MIN_OCCURS = 10;
-    private static final String NON_LATIN_NON_CYRILLIC_CHAR = "[^a-zA-Zа-яА-Я]";
+    private static final String NON_LATIN_NON_CYRILLIC_CHAR = "[^a-zA-Z\u0430-\u044F\u0410-\u042F]";
     private static final String WHITESPACE = " ";
+    public static final String WINDOWS_EOL = "\r\n";
+    public static final String UNIX_EOL = "\n";
+    public static final String CARRIAGE_RETURN = "\r";
 
     public String countWords(final List<String> lines) {
         List<String> words = getWordsFromText(lines);
@@ -25,7 +28,12 @@ public class Words {
             }
         }
         removeLastLineFeed(output);
-        return output.toString();
+        return normalizeEOL(output.toString());
+    }
+
+    private String normalizeEOL(String output) {
+        output = output.replace(WINDOWS_EOL, UNIX_EOL);
+        return output.replace(CARRIAGE_RETURN, UNIX_EOL);
     }
 
     private List<String> getWordsFromText(final List<String> lines) {
@@ -56,7 +64,7 @@ public class Words {
     }
 
     private void removeLastLineFeed(final StringBuilder output) {
-        output.delete(output.length() - 1, output.length());
+        output.delete(output.length() - System.lineSeparator().length(), output.length());
     }
 
     private static class WordEntry {
